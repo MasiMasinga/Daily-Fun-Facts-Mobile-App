@@ -17,12 +17,25 @@ import {
     FormControlError,
     FormControlErrorText,
     FormControlErrorIcon,
-    AlertCircleIcon
+    AlertCircleIcon,
+    Toast,
+    ToastTitle,
+    Pressable,
+    Icon,
+    CloseIcon,
+    CheckIcon,
 } from '@gluestack-ui/themed';
+import { createToastHook } from "@gluestack-ui/toast"
 
+// Supabase
+import { supabase } from '../../../../config/supabase';
+
+const useToast = createToastHook(Toast)
 
 const Login = () => {
+    const toast = useToast()
     const navigation = useNavigation();
+    const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -68,7 +81,6 @@ const Login = () => {
             valid = false;
         }
 
-
         return valid;
     };
 
@@ -79,10 +91,55 @@ const Login = () => {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (validate()) {
-            navigation.navigate('MainTabNavigation');
-            resetForm();
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
+
+            if (data.session && data.user) {
+                navigation.navigate('MainTabNavigation');
+                toast.show({
+                    placement: 'top',
+                    render: ({ id }) => {
+                        return (
+                            <Toast bg="$success700" nativeId={id} action="success" p="$3">
+                                <Icon as={CheckIcon} color="$white" mt="$1" mr="$3" />
+                                <VStack space="xs">
+                                    <ToastTitle color="$textLight50">
+                                        Login Successful
+                                    </ToastTitle>
+                                </VStack>
+                                <Pressable mt="$1" onPress={() => toast.close(id)}>
+                                    <Icon as={CloseIcon} color="$coolGray50" />
+                                </Pressable>
+                            </Toast>
+                        )
+                    }
+                });
+                resetForm();
+            } else {
+                toast.show({
+                    placement: 'top',
+                    render: ({ id }) => {
+                        return (
+                            <Toast bg="$error700" nativeId={id} action="error" p="$3">
+                                <Icon as={CheckIcon} color="$white" mt="$1" mr="$3" />
+                                <VStack space="xs">
+                                    <ToastTitle color="$textLight50">
+                                        Login Failed
+                                    </ToastTitle>
+                                </VStack>
+                                <Pressable mt="$1" onPress={() => toast.close(id)}>
+                                    <Icon as={CloseIcon} color="$coolGray50" />
+                                </Pressable>
+                            </Toast>
+                        )
+                    }
+                });
+            }
+            setLoading(false)
         }
     };
 
@@ -135,6 +192,7 @@ const Login = () => {
 
                 <FormControl>
                     <Button size="md" variant="solid" action="primary" onPress={handleSubmit}>
+                        {loading && <ButtonSpinner mr="$1" />}
                         <ButtonText>Login </ButtonText>
                     </Button>
                 </FormControl>

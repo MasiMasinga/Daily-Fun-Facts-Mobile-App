@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Alert, StyleSheet, View } from 'react-native'
 
 // React Navigation
 import { useNavigation } from '@react-navigation/native';
@@ -17,14 +18,27 @@ import {
     FormControlError,
     FormControlErrorText,
     FormControlErrorIcon,
-    AlertCircleIcon
+    AlertCircleIcon,
+    ButtonSpinner,
+    Toast,
+    ToastTitle,
+    ToastDescription,
+    Pressable,
+    Icon,
+    CloseIcon,
+    CheckIcon,
+    AlertTriangleIcon
 } from '@gluestack-ui/themed';
 
-// Api
-import AuthService from '../../../services/auth/auth.service';
+import { createToastHook } from "@gluestack-ui/toast"
 
+// Supabase
+import { supabase } from '../../../../config/supabase';
+
+const useToast = createToastHook(Toast)
 
 const Register = () => {
+    const toast = useToast()
     const navigation = useNavigation();
     const [formData, setFormData] = useState({
         name: '',
@@ -38,6 +52,7 @@ const Register = () => {
         password: '',
         confirmPassword: ''
     });
+    const [loading, setLoading] = useState(false);
 
     const validate = () => {
         let valid = true;
@@ -119,10 +134,61 @@ const Register = () => {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (validate()) {
-            navigation.navigate('LoginScreen');
-            resetForm();
+            setLoading(true)
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password
+            });
+            if (data) {
+                navigation.navigate('LoginScreen');
+                toast.show({
+                    placement: 'top',
+                    render: ({ id }) => {
+                        return (
+                            <Toast bg="$success700" nativeId={id} action="success" p="$3">
+                                <Icon as={CheckIcon} color="$white" mt="$1" mr="$3" />
+                                <VStack space="xs">
+                                    <ToastTitle color="$textLight50">
+                                        Registration Successful
+                                    </ToastTitle>
+                                    <ToastDescription color="$textLight50">
+                                        You can now login to your account.
+                                    </ToastDescription>
+                                </VStack>
+                                <Pressable mt="$1" onPress={() => toast.close(id)}>
+                                    <Icon as={CloseIcon} color="$coolGray50" />
+                                </Pressable>
+                            </Toast>
+                        )
+                    }
+                });
+                resetForm();
+            } else {
+                toast.show({
+                    placement: 'top',
+                    render: ({ id }) => {
+                        return (
+                            <Toast bg="$error700" nativeId={id} action="error" p="$3">
+                                <Icon as={AlertTriangleIcon} color="$white" mt="$1" mr="$3" />
+                                <VStack space="xs">
+                                    <ToastTitle color="$textLight50">
+                                        Registration Failed
+                                    </ToastTitle>
+                                    <ToastDescription color="$textLight50">
+                                        {error}
+                                    </ToastDescription>
+                                </VStack>
+                                <Pressable mt="$1" onPress={() => toast.close(id)}>
+                                    <Icon as={CloseIcon} color="$coolGray50" />
+                                </Pressable>
+                            </Toast>
+                        )
+                    }
+                })
+            }
+            setLoading(false)
         }
     };
 
@@ -215,6 +281,7 @@ const Register = () => {
 
                 <FormControl>
                     <Button size="md" variant="solid" action="primary" onPress={handleSubmit}>
+                        {loading && <ButtonSpinner mr="$1" />}
                         <ButtonText>Register </ButtonText>
                     </Button>
                 </FormControl>

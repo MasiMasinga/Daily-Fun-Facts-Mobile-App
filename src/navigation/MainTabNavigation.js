@@ -26,8 +26,8 @@ const MainTabNavigation = () => {
                 component={HomeNavigation}
                 options={{
                     tabBarLabel: 'Home',
-                    tabBarIcon: ({ color, size }) => (
-                        <Icon name="home" type="ionicon" color="#000" size={26} />
+                    tabBarIcon: () => (
+                        <Icon name="home" type="ionicon" color="#4AA9FF" size={30} />
                     ),
                 }}
             />
@@ -36,8 +36,8 @@ const MainTabNavigation = () => {
                 component={ProfileNavigation}
                 options={{
                     tabBarLabel: 'Profile',
-                    tabBarIcon: ({ color, size }) => (
-                        <Icon name="account-circle" type="ionicon" color="#000" size={26} />
+                    tabBarIcon: () => (
+                        <Icon name="account-circle" type="ionicon" color="#4AA9FF" size={30} />
                     ),
                 }}
             />

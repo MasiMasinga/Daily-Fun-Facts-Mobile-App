@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 
 // Gluestack UI
 import { Box, Text, Button, ButtonText } from '@gluestack-ui/themed';
+import { REACT_NATIVE_SUPABASE_URL, REACT_NATIVE_SUPABASE_ANON_KEY } from 'react-native-dotenv';
+
 
 const Onboarding = () => {
     const navigation = useNavigation();
@@ -15,10 +17,10 @@ const Onboarding = () => {
             <Text color="$black" size="5xl" fontWeight="$bold" textAlign="center">
                 Daily Fun Facts
             </Text>
-            <Button 
-                size="md" 
-                variant="solid" 
-                action="primary" 
+            <Button
+                size="md"
+                variant="solid"
+                action="primary"
                 onPress={() => navigation.navigate('RegisterScreen')}
             >
                 <ButtonText>Get Started </ButtonText>
